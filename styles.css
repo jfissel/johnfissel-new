@@ -295,6 +295,9 @@ html.marquee-paused .marquee-toggle .icon-play { opacity: 1; transform: none; }
   width: 100%;
   height: 112%;
   object-fit: cover;
+  /* subject sits right-of-center with his head near the top; keep both in
+     frame when narrow viewports crop the sides or parallax crops the top */
+  object-position: 65% 28%;
   filter: grayscale(1);
   will-change: transform;
 }
@@ -318,7 +321,7 @@ html.marquee-paused .marquee-toggle .icon-play { opacity: 1; transform: none; }
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(180deg, rgb(10 10 10 / 0.45) 0%, rgb(10 10 10 / 0.12) 45%, rgb(10 10 10 / 0.62) 100%);
+  background: linear-gradient(180deg, rgb(10 10 10 / 0.45) 0%, rgb(10 10 10 / 0.12) 45%, rgb(10 10 10 / 0.74) 100%);
 }
 
 /* axis baseline with upward ticks — the ticker reads as a chart axis */

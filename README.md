@@ -33,6 +33,20 @@ security headers (including the CSP) and cache lifetimes.
 > ```sh
 > python3 -c "import re,hashlib,base64;s=re.search(r'<script>(.*?)</script>',open('index.html').read(),16).group(1);print('sha256-'+base64.b64encode(hashlib.sha256(s.encode()).digest()).decode())"
 > ```
+>
+> The same script is duplicated byte-for-byte in `404.html` — keep the two
+> copies identical so one hash covers both.
+
+## Analytics
+
+Nothing is embedded in the pages. Since the site is hosted on Cloudflare,
+turn on [Web Analytics](https://www.cloudflare.com/web-analytics/) from the
+dashboard instead — Cloudflare injects its cookie-free beacon automatically
+at serve time (Pages project → **Metrics**, or the account-level **Web
+Analytics** section). The CSP in `_headers` already allow-lists
+`static.cloudflareinsights.com` / `cloudflareinsights.com` so the injected
+beacon isn't blocked; if you never enable analytics, those entries are
+harmless.
 
 ## Swapping the hero image
 
@@ -56,11 +70,12 @@ single `<p class="lede">`. Contact links are in `<section id="contact">`.
 | File | Purpose |
 | --- | --- |
 | `index.html` | All content and meta tags |
+| `404.html` | Custom not-found page (served automatically by Cloudflare Pages) |
 | `styles.css` | Design tokens (grayscale ramp), themes, layout, animations |
-| `main.js` | Theme toggle, scroll reveals, parallax, scroll index, cursor dot |
+| `main.js` | Theme toggle, marquee pause, scroll reveals, parallax, scroll index, cursor dot |
 | `assets/fonts/` | Self-hosted Space Grotesk + Inter (variable woff2, hashed filenames) |
 | `assets/og.png` | 1200×630 social share image |
-| `assets/icon.svg` / `assets/apple-touch-icon.png` | Favicons |
+| `assets/icon.svg` / `assets/apple-touch-icon.png` / `favicon.ico` | Favicons |
 | `_headers` | Cloudflare Pages security headers + caching |
 | `robots.txt`, `sitemap.xml` | SEO plumbing |
 

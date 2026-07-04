@@ -22,7 +22,6 @@
   function syncThemeUI() {
     var dark = effectiveTheme() === "dark";
     toggle.setAttribute("aria-pressed", String(dark));
-    toggle.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
     var metas = document.querySelectorAll('meta[name="theme-color"]');
     for (var i = 0; i < metas.length; i++) {
       if (doc.hasAttribute("data-theme")) {
@@ -52,6 +51,16 @@
 
   systemDark.addEventListener("change", syncThemeUI);
   syncThemeUI();
+
+  /* ---------- Marquee pause (WCAG 2.2.2 pause/stop/hide) ---------- */
+
+  var marqueeToggle = document.getElementById("marquee-toggle");
+  if (marqueeToggle) {
+    marqueeToggle.addEventListener("click", function () {
+      var paused = doc.classList.toggle("marquee-paused");
+      marqueeToggle.setAttribute("aria-pressed", String(paused));
+    });
+  }
 
   /* ---------- Copyright year ---------- */
 

@@ -33,6 +33,23 @@ security headers (including the CSP) and cache lifetimes.
 > ```sh
 > python3 -c "import re,hashlib,base64;s=re.search(r'<script>(.*?)</script>',open('index.html').read(),16).group(1);print('sha256-'+base64.b64encode(hashlib.sha256(s.encode()).digest()).decode())"
 > ```
+>
+> The same script is duplicated byte-for-byte in `404.html` — keep the two
+> copies identical so one hash covers both.
+
+## Enabling analytics (Cloudflare Web Analytics)
+
+The site ships with a commented-out [Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/)
+beacon (cookie-free, no consent banner needed). To turn it on:
+
+1. In the Cloudflare dashboard, go to **Web Analytics** and add
+   `johnfissel.com` — copy the site token.
+2. In `index.html`, find the commented `beacon.min.js` script near
+   `</body>`, replace `REPLACE_WITH_CF_ANALYTICS_TOKEN` with your token,
+   and uncomment the tag.
+
+The CSP in `_headers` already allows the beacon's script and its
+`connect-src` endpoint, so no header changes are needed.
 
 ## Swapping the hero image
 
@@ -56,11 +73,12 @@ single `<p class="lede">`. Contact links are in `<section id="contact">`.
 | File | Purpose |
 | --- | --- |
 | `index.html` | All content and meta tags |
+| `404.html` | Custom not-found page (served automatically by Cloudflare Pages) |
 | `styles.css` | Design tokens (grayscale ramp), themes, layout, animations |
-| `main.js` | Theme toggle, scroll reveals, parallax, scroll index, cursor dot |
+| `main.js` | Theme toggle, marquee pause, scroll reveals, parallax, scroll index, cursor dot |
 | `assets/fonts/` | Self-hosted Space Grotesk + Inter (variable woff2, hashed filenames) |
 | `assets/og.png` | 1200×630 social share image |
-| `assets/icon.svg` / `assets/apple-touch-icon.png` | Favicons |
+| `assets/icon.svg` / `assets/apple-touch-icon.png` / `favicon.ico` | Favicons |
 | `_headers` | Cloudflare Pages security headers + caching |
 | `robots.txt`, `sitemap.xml` | SEO plumbing |
 

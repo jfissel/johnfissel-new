@@ -216,12 +216,11 @@ a.u-sweep:focus-visible { background-size: 100% 1px; }
   background-size: calc(100% - 1.75rem) 1px;
 }
 
-.theme-toggle {
+.icon-btn {
   display: grid;
   place-items: center;
   width: 2.75rem;
   height: 2.75rem;
-  margin-left: 0.5rem;
   padding: 0;
   border: 1px solid rgb(246 246 246 / 0.35);
   border-radius: 50%;
@@ -231,14 +230,29 @@ a.u-sweep:focus-visible { background-size: 100% 1px; }
   transition: border-color 0.25s, transform 0.25s var(--ease-out);
 }
 
-.theme-toggle:hover { border-color: var(--g-paper); }
-.theme-toggle:active { transform: scale(0.92); }
+.theme-toggle { margin-left: 0.5rem; }
+.marquee-toggle { margin-left: 0.25rem; }
+
+.icon-btn:hover { border-color: var(--g-paper); }
+.icon-btn:active { transform: scale(0.92); }
 
 /* both icons stacked in the same cell; the active one rotates/fades in */
-.theme-toggle svg { grid-area: 1 / 1; }
+.icon-btn svg { grid-area: 1 / 1; }
 
 .theme-toggle .icon-sun { opacity: 0; transform: rotate(-90deg) scale(0.5); }
 .theme-toggle .icon-moon { opacity: 1; transform: none; }
+
+/* marquee pause/play: pause shows while running, play while paused */
+.marquee-toggle .icon-play { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+.marquee-toggle .icon-pause { opacity: 1; transform: none; }
+
+html.marquee-paused .marquee-toggle .icon-pause { opacity: 0; transform: rotate(90deg) scale(0.5); }
+html.marquee-paused .marquee-toggle .icon-play { opacity: 1; transform: none; }
+
+/* the ticker only animates for motion-OK users; hide the control otherwise */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-toggle { display: none; }
+}
 
 @media (prefers-color-scheme: dark) {
   html:not([data-theme]) .theme-toggle .icon-sun { opacity: 1; transform: none; }
@@ -277,12 +291,42 @@ a.u-sweep:focus-visible { background-size: 100% 1px; }
   will-change: transform;
 }
 
+/* film grain so the photo reads as texture, not a flat JPG */
+.hero-media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  mix-blend-mode: overlay;
+  opacity: 0.16;
+  pointer-events: none;
+}
+
 /* scrim so the name passes contrast over any future photo */
 .hero-media::after {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: linear-gradient(180deg, rgb(10 10 10 / 0.45) 0%, rgb(10 10 10 / 0.12) 45%, rgb(10 10 10 / 0.62) 100%);
+}
+
+/* axis baseline with upward ticks — the ticker reads as a chart axis */
+.hero::after {
+  content: "";
+  position: absolute;
+  left: var(--pad);
+  right: var(--pad);
+  bottom: clamp(0.625rem, 2vh, 1.375rem);
+  z-index: 1;
+  height: 7px;
+  border-bottom: 1px solid rgb(246 246 246 / 0.45);
+  background-image: linear-gradient(90deg, rgb(246 246 246 / 0.35) 0 1px, transparent 1px);
+  background-size: 6rem 100%;
+  background-repeat: repeat-x;
+  pointer-events: none;
 }
 
 /* one enormous line, drifting horizontally like a slow ticker */
@@ -338,7 +382,7 @@ a.u-sweep:focus-visible { background-size: 100% 1px; }
 .section:first-of-type { border-top: 0; }
 .section:first-of-type::before { content: none; }
 
-#about, #contact {
+#about, #contact, .error-hero {
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
@@ -353,9 +397,9 @@ a.u-sweep:focus-visible { background-size: 100% 1px; }
 .label {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.2em;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -399,7 +443,7 @@ a.u-sweep:focus-visible { background-size: 100% 1px; }
   transition: color 0.25s;
 }
 
-.contact-row:hover .contact-label { color: var(--ink); }
+a.contact-row:hover .contact-label { color: var(--ink); }
 
 .contact-value {
   font-family: var(--font-display);
@@ -407,7 +451,10 @@ a.u-sweep:focus-visible { background-size: 100% 1px; }
   font-size: clamp(1.125rem, 1rem + 0.9vw, 1.625rem);
   letter-spacing: -0.01em;
   overflow-wrap: anywhere;
+  transition: transform 0.35s var(--ease-out);
 }
+
+a.contact-row:hover .contact-value { transform: translateX(-0.375rem); }
 
 .ext {
   display: inline-block;
@@ -417,7 +464,7 @@ a.u-sweep:focus-visible { background-size: 100% 1px; }
   transition: transform 0.3s var(--ease-out), color 0.25s;
 }
 
-.contact-row:hover .ext {
+a.contact-row:hover .ext {
   transform: translate(0.15em, -0.15em);
   color: var(--ink);
 }
@@ -463,6 +510,11 @@ a.u-sweep:focus-visible { background-size: 100% 1px; }
 /* ---------- Footer ---------- */
 
 .site-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
   max-width: var(--maxw);
   margin-inline: auto;
   padding: 1.75rem var(--pad) 2rem;
@@ -474,6 +526,24 @@ a.u-sweep:focus-visible { background-size: 100% 1px; }
   font-size: 0.8125rem;
   color: var(--muted);
 }
+
+.foot-top {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  transition: color 0.25s;
+}
+
+.foot-top:hover { color: var(--ink); }
+
+.foot-top-arrow {
+  display: inline-block;
+  margin-left: 0.35em;
+  transition: transform 0.3s var(--ease-out);
+}
+
+.foot-top:hover .foot-top-arrow { transform: translateY(-0.15em); }
 
 /* ---------- The index: scroll-position readout ---------- */
 
@@ -495,6 +565,35 @@ a.u-sweep:focus-visible { background-size: 100% 1px; }
 
 html:not(.js) .readout { display: none; }
 html:not(.js) .theme-toggle { display: none; }
+html:not(.js) .marquee-toggle { display: none; }
+
+/* ---------- Error page (404.html) ---------- */
+
+.page-error .site-head {
+  position: static;
+  color: var(--ink);
+}
+
+.page-error .site-head :focus-visible { outline-color: var(--ink); }
+
+.page-error .icon-btn { border-color: var(--hairline); }
+.page-error .icon-btn:hover { border-color: var(--ink); }
+
+.error-hero {
+  min-height: 62svh;
+  align-content: center;
+  border-top: 0;
+}
+
+.error-hero::before { content: none; }
+
+.error-cta {
+  margin: 2.25rem 0 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.25rem, 1rem + 1.2vw, 1.875rem);
+  letter-spacing: -0.01em;
+}
 
 /* ---------- Cursor dot (fine pointers only, added by JS) ---------- */
 
@@ -556,12 +655,17 @@ html:not(.js) .theme-toggle { display: none; }
     animation: marquee 90s linear infinite;
   }
 
+  /* WCAG 2.2.2 — the nav pause button freezes the ticker in place */
+  html.marquee-paused .marquee-track {
+    animation-play-state: paused;
+  }
+
   @keyframes marquee {
     to { transform: translateX(-50%); }
   }
 
-  /* theme toggle: icons rotate/fade through the switch */
-  .theme-toggle svg {
+  /* toggle buttons: icons rotate/fade through the switch */
+  .icon-btn svg {
     transition: transform 0.5s var(--ease-out), opacity 0.3s linear;
   }
 
@@ -583,6 +687,7 @@ html:not(.js) .theme-toggle { display: none; }
   .nav-links li:nth-child(1) { animation: fade-in 0.6s ease 0.3s both; }
   .nav-links li:nth-child(2) { animation: fade-in 0.6s ease 0.42s both; }
   .theme-toggle { animation: fade-in 0.6s ease 0.54s both; }
+  .marquee-toggle { animation: fade-in 0.6s ease 0.66s both; }
 
   @keyframes fade-in {
     from { opacity: 0; transform: translateY(-6px); }
@@ -619,7 +724,7 @@ html:not(.js) .theme-toggle { display: none; }
 /* ---------- Wider screens: the two-column editorial grid ---------- */
 
 @media (min-width: 48rem) {
-  #about, #contact {
+  #about, #contact, .error-hero {
     grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr);
     gap: var(--pad);
   }

@@ -4,13 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>John Fissel — CPA / Investment Analyst</title>
-  <meta name="description" content="John Fissel is a CPA working as an investment analyst — pairing fundamental analysis with data visualization, automation, analytics, and AI.">
+  <meta name="description" content="John Fissel is a CPA working as an investment analyst — pairing fundamental analysis with data visualization, automation, analytics, and AI. Based in Austin, TX.">
   <link rel="canonical" href="https://johnfissel.com/">
 
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6f6f6">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0a0a">
 
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="John Fissel">
   <meta property="og:url" content="https://johnfissel.com/">
   <meta property="og:title" content="John Fissel — CPA / Investment Analyst">
   <meta property="og:description" content="CPA working as an investment analyst — data visualization, automation, analytics, and AI.">
@@ -35,7 +36,7 @@
   <link rel="stylesheet" href="/styles.css">
   <script src="/main.js" defer></script>
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"John Fissel","url":"https://johnfissel.com/","jobTitle":"CPA / Investment Analyst","email":"mailto:contact@johnfissel.com","sameAs":["https://www.linkedin.com/in/johnfissel/","https://x.com/johnfissel"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"John Fissel","url":"https://johnfissel.com/","jobTitle":"CPA / Investment Analyst","email":"mailto:contact@johnfissel.com","address":{"@type":"PostalAddress","addressLocality":"Austin","addressRegion":"TX","addressCountry":"US"},"sameAs":["https://www.linkedin.com/in/johnfissel/","https://x.com/johnfissel"]}</script>
 </head>
 <body id="top">
   <a class="skip" href="#main">Skip to content</a>
@@ -47,13 +48,21 @@
         <li><a class="nav-link u-sweep" href="#about">About</a></li>
         <li><a class="nav-link u-sweep" href="#contact">Contact</a></li>
       </ul>
-      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false">
+      <button class="icon-btn theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false">
         <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
           <circle cx="12" cy="12" r="4.25"></circle>
           <path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.28 5.28l1.7 1.7M17.02 17.02l1.7 1.7M18.72 5.28l-1.7 1.7M6.98 17.02l-1.7 1.7"></path>
         </svg>
         <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"></path>
+        </svg>
+      </button>
+      <button class="icon-btn marquee-toggle" id="marquee-toggle" type="button" aria-label="Pause the scrolling headline" aria-pressed="false">
+        <svg class="icon-pause" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+          <path d="M9 6.5v11M15 6.5v11"></path>
+        </svg>
+        <svg class="icon-play" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8.5 6.2v11.6L18 12Z"></path>
         </svg>
       </button>
     </nav>
@@ -86,7 +95,7 @@
         <h2 class="label">About</h2>
       </div>
       <div class="content reveal-group">
-        <p class="lede">I’m a CPA working as an investment analyst. My foundation was built in audit at a Big&nbsp;Four firm, where I learned rigor, skepticism, and how to find the number that doesn’t belong. Today I bring that discipline to markets — pairing fundamental analysis with data visualization, automation, and AI to work faster and see further. Clean data, sharp questions, and tools that get out of the way.</p>
+        <p class="lede">I’m a CPA working as an investment analyst. My foundation was built in audit at a Big&nbsp;Four firm, where I learned rigor, skepticism, and how to find the number that doesn’t belong. Today I bring that discipline to markets — pairing fundamental analysis with data visualization, automation, and AI to work faster and see further. Clean data, sharp questions, and tools that get out of the way. Based in Austin, Texas.</p>
       </div>
     </section>
 
@@ -120,6 +129,12 @@
               <span class="contact-value u-sweep">x.com/johnfissel<span class="ext" aria-hidden="true">&nearr;</span></span>
             </a>
           </li>
+          <li>
+            <div class="contact-row">
+              <span class="contact-label">Location</span>
+              <span class="contact-value">Austin, TX</span>
+            </div>
+          </li>
         </ul>
       </div>
     </section>
@@ -133,9 +148,17 @@
   </main>
 
   <footer class="site-foot">
-    <p>© <span id="year">2026</span> John Fissel</p>
+    <p>© <span id="year">2026</span> John Fissel · Austin, TX</p>
+    <a class="foot-top u-sweep" href="#top">Back to top<span class="foot-top-arrow" aria-hidden="true">&uarr;</span></a>
   </footer>
 
   <div class="readout" id="readout" aria-hidden="true"><span id="readout-n">0.000</span></div>
+
+  <!-- Cloudflare Web Analytics (cookie-free). To enable: grab your beacon
+       token from the Cloudflare dashboard → Web Analytics, replace
+       REPLACE_WITH_CF_ANALYTICS_TOKEN below, and uncomment the script tag.
+       The CSP in _headers already allows it.
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "REPLACE_WITH_CF_ANALYTICS_TOKEN"}'></script>
+  -->
 </body>
 </html>

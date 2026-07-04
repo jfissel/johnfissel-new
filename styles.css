@@ -277,7 +277,9 @@ html.marquee-paused .marquee-toggle .icon-play { opacity: 1; transform: none; }
 .hero {
   position: relative;
   overflow: hidden;
-  min-height: min(92svh, 62rem);
+  /* the 48vw term lets the hero grow with viewport width (~2:1 aspect cap),
+     so huge screens don't crop the photo down to a face-filling strip */
+  min-height: min(92svh, max(62rem, 48vw));
   display: flex;
   align-items: flex-end;
 }

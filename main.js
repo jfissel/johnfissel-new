@@ -45,13 +45,44 @@
   systemDark.addEventListener("change", syncThemeUI);
   syncThemeUI();
 
-  /* ---------- Marquee pause (WCAG 2.2.2 pause/stop/hide) ---------- */
+  /* ---------- Marquee pause (WCAG 2.2.2 pause/stop/hide) ----------
+     Safari runs transform animations on the compositor thread, and pausing
+     via animation-play-state snaps the track to the main thread's stale
+     position. Instead: freeze by pinning the live transform inline and
+     removing the animation; resume from the same spot with a negative
+     animation-delay. */
 
   var marqueeToggle = document.getElementById("marquee-toggle");
-  if (marqueeToggle) {
+  var marqueeTrack = document.querySelector(".marquee-track");
+  var marqueeProgress = 0; /* fraction of one loop completed at pause time */
+
+  function marqueeX(el) {
+    var t = getComputedStyle(el).transform;
+    return t && t !== "none" ? new DOMMatrixReadOnly(t).m41 : 0;
+  }
+
+  if (marqueeToggle && marqueeTrack) {
     marqueeToggle.addEventListener("click", function () {
       var paused = doc.classList.toggle("marquee-paused");
       marqueeToggle.setAttribute("aria-pressed", String(paused));
+      try {
+        if (paused) {
+          var x = marqueeX(marqueeTrack);
+          var half = marqueeTrack.scrollWidth / 2;
+          marqueeProgress = half > 0 ? Math.min(Math.max(-x / half, 0), 1) : 0;
+          marqueeTrack.style.transform = "translateX(" + x + "px)";
+          marqueeTrack.style.animation = "none";
+        } else {
+          marqueeTrack.style.animation = "";
+          var dur = parseFloat(getComputedStyle(marqueeTrack).animationDuration) || 0;
+          marqueeTrack.style.animationDelay = (-marqueeProgress * dur).toFixed(3) + "s";
+          marqueeTrack.style.transform = "";
+        }
+      } catch (e) {
+        /* fall back to the CSS play-state rule (class is already toggled) */
+        marqueeTrack.style.animation = "";
+        marqueeTrack.style.transform = "";
+      }
     });
   }
 

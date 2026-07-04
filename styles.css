@@ -1,0 +1,631 @@
+/* ============================================================
+   John Fissel — johnfissel.com
+   Monochrome editorial. No dependencies, no build step.
+   ============================================================ */
+
+/* ---------- Fonts (self-hosted, variable) ---------- */
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("/assets/fonts/space-grotesk-var.06408904.woff2") format("woff2");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/assets/fonts/inter-var.3100e775.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Metric-matched fallbacks — prevent layout shift during font swap */
+@font-face {
+  font-family: "Space Grotesk Fallback";
+  src: local("Arial");
+  size-adjust: 101%;
+  ascent-override: 98%;
+  descent-override: 29%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Inter Fallback";
+  src: local("Arial");
+  size-adjust: 107%;
+  ascent-override: 90%;
+  descent-override: 22.5%;
+  line-gap-override: 0%;
+}
+
+/* ---------- Design tokens: the grayscale ramp ---------- */
+
+:root {
+  /* ramp: near-black → near-white */
+  --g-ink:      #0a0a0a;
+  --g-coal:     #161616;
+  --g-graphite: #2e2e2e;
+  --g-slate:    #555555;
+  --g-steel:    #6b6b6b; /* muted text on light — 4.9:1 on paper */
+  --g-silver:   #9a9a9a; /* muted text on dark  — 7.0:1 on ink   */
+  --g-mist:     #d6d6d6;
+  --g-fog:      #ededed;
+  --g-paper:    #f6f6f6;
+
+  /* semantic (light theme) */
+  --bg: var(--g-paper);
+  --ink: var(--g-ink);
+  --muted: var(--g-steel);
+  --hairline: var(--g-mist);
+  --surface: var(--g-fog);
+
+  --font-display: "Space Grotesk", "Space Grotesk Fallback", system-ui, sans-serif;
+  --font-body: "Inter", "Inter Fallback", system-ui, sans-serif;
+
+  --pad: clamp(1.25rem, 4vw, 4rem);
+  --maxw: 84rem;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: var(--g-ink);
+    --ink: var(--g-paper);
+    --muted: var(--g-silver);
+    --hairline: var(--g-graphite);
+    --surface: var(--g-coal);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: var(--g-ink);
+  --ink: var(--g-paper);
+  --muted: var(--g-silver);
+  --hairline: var(--g-graphite);
+  --surface: var(--g-coal);
+  color-scheme: dark;
+}
+
+/* ---------- Base ---------- */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  line-height: 1.6;
+  overflow-x: clip;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+
+a { color: inherit; text-decoration: none; }
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+::selection { background: var(--ink); color: var(--bg); }
+
+.skip {
+  position: absolute;
+  left: 1rem;
+  top: -3.5rem;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 0.875rem;
+  transition: top 0.2s;
+}
+
+.skip:focus-visible { top: 1rem; outline-color: var(--bg); }
+
+/* ---------- Underline sweep ---------- */
+
+.u-sweep {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  transition: background-size 0.4s var(--ease-out);
+}
+
+a:hover .u-sweep,
+a.u-sweep:hover,
+a:focus-visible .u-sweep,
+a.u-sweep:focus-visible { background-size: 100% 1px; }
+
+/* ---------- Header / nav (transparent, overlays the hero) ---------- */
+
+.site-head {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  color: var(--g-paper);
+}
+
+.site-head :focus-visible { outline-color: var(--g-paper); }
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 4.5rem;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding: 0.25rem var(--pad) 0;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.1875rem;
+  letter-spacing: 0.04em;
+  padding: 0.75rem 0.75rem 0.75rem 0;
+  margin-right: auto;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 0.25rem;
+}
+
+.nav-link {
+  display: inline-block;
+  padding: 0.75rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.nav-link.u-sweep {
+  background-position: 0.875rem calc(100% - 0.5rem);
+}
+
+.nav-link.u-sweep:hover,
+.nav-link.u-sweep:focus-visible {
+  background-size: calc(100% - 1.75rem) 1px;
+}
+
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-left: 0.5rem;
+  padding: 0;
+  border: 1px solid rgb(246 246 246 / 0.35);
+  border-radius: 50%;
+  background: transparent;
+  color: currentColor;
+  cursor: pointer;
+  transition: border-color 0.25s, transform 0.25s var(--ease-out);
+}
+
+.theme-toggle:hover { border-color: var(--g-paper); }
+.theme-toggle:active { transform: scale(0.92); }
+
+/* both icons stacked in the same cell; the active one rotates/fades in */
+.theme-toggle svg { grid-area: 1 / 1; }
+
+.theme-toggle .icon-sun { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+.theme-toggle .icon-moon { opacity: 1; transform: none; }
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .theme-toggle .icon-sun { opacity: 1; transform: none; }
+  html:not([data-theme]) .theme-toggle .icon-moon { opacity: 0; transform: rotate(90deg) scale(0.5); }
+}
+
+:root[data-theme="dark"] .theme-toggle .icon-sun { opacity: 1; transform: none; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { opacity: 0; transform: rotate(90deg) scale(0.5); }
+:root[data-theme="light"] .theme-toggle .icon-sun { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+:root[data-theme="light"] .theme-toggle .icon-moon { opacity: 1; transform: none; }
+
+/* ---------- Hero ---------- */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  min-height: min(92svh, 62rem);
+  display: flex;
+  align-items: flex-end;
+}
+
+.hero-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hero-media img {
+  position: absolute;
+  left: 0;
+  top: -6%;
+  width: 100%;
+  height: 112%;
+  object-fit: cover;
+  filter: grayscale(1);
+  will-change: transform;
+}
+
+/* scrim so the name passes contrast over any future photo */
+.hero-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(10 10 10 / 0.45) 0%, rgb(10 10 10 / 0.12) 45%, rgb(10 10 10 / 0.62) 100%);
+}
+
+/* one enormous line, drifting horizontally like a slow ticker */
+.hero-line {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  margin: 0;
+  padding-bottom: clamp(1.25rem, 4vh, 3rem);
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--g-paper);
+  font-family: var(--font-display);
+  font-weight: 550;
+  font-size: clamp(3.75rem, 16vw, 17rem);
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+}
+
+.hero-line-in { display: inline-block; }
+
+.marquee-track {
+  display: inline-block;
+  will-change: transform;
+}
+
+.marquee-item { display: inline-block; }
+
+/* ---------- Sections: label rail + content ---------- */
+
+.section {
+  position: relative;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding: clamp(3.5rem, 9vh, 7rem) var(--pad);
+  border-top: 1px solid var(--hairline);
+}
+
+/* axis ticks along each section's top rule — the chart-grid signature */
+.section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--pad);
+  right: var(--pad);
+  height: 7px;
+  background-image: linear-gradient(90deg, var(--hairline) 0 1px, transparent 1px);
+  background-size: 6rem 100%;
+  background-repeat: repeat-x;
+}
+
+.section:first-of-type { border-top: 0; }
+.section:first-of-type::before { content: none; }
+
+#about, #contact {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.rail {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.label {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.lede {
+  margin: 0;
+  max-width: 34ch;
+  font-family: var(--font-display);
+  font-weight: 420;
+  font-size: clamp(1.375rem, 1.05rem + 1.6vw, 2.125rem);
+  line-height: 1.4;
+  letter-spacing: -0.008em;
+  text-wrap: pretty;
+}
+
+/* ---------- Contact ---------- */
+
+.contact-list {
+  list-style: none;
+  margin: -0.5rem 0 0;
+  padding: 0;
+}
+
+.contact-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1.125rem 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.contact-label {
+  flex: 0 0 6.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 0.25s;
+}
+
+.contact-row:hover .contact-label { color: var(--ink); }
+
+.contact-value {
+  font-family: var(--font-display);
+  font-weight: 480;
+  font-size: clamp(1.125rem, 1rem + 0.9vw, 1.625rem);
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.ext {
+  display: inline-block;
+  margin-left: 0.4em;
+  font-size: 0.7em;
+  color: var(--muted);
+  transition: transform 0.3s var(--ease-out), color 0.25s;
+}
+
+.contact-row:hover .ext {
+  transform: translate(0.15em, -0.15em);
+  color: var(--ink);
+}
+
+/* ---------- CTA ---------- */
+
+.cta { padding-block: clamp(5rem, 14vh, 10rem); }
+
+.cta-line {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2.375rem, 1rem + 7vw, 7.25rem);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+}
+
+.cta-quiet {
+  display: block;
+  color: var(--muted);
+}
+
+.cta-link {
+  display: inline-block;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-size: 100% 0.045em;
+  background-position: 0 96%;
+  transition: background-size 0.4s var(--ease-out);
+}
+
+.cta-link:hover,
+.cta-link:focus-visible { background-size: 0% 0.045em; }
+
+.cta-arrow {
+  display: inline-block;
+  margin-left: 0.12em;
+  transition: transform 0.35s var(--ease-out);
+}
+
+.cta-link:hover .cta-arrow { transform: translate(0.08em, -0.08em); }
+
+/* ---------- Footer ---------- */
+
+.site-foot {
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding: 1.75rem var(--pad) 2rem;
+  border-top: 1px solid var(--hairline);
+}
+
+.site-foot p {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+/* ---------- The index: scroll-position readout ---------- */
+
+.readout {
+  position: fixed;
+  right: clamp(0.875rem, 2vw, 2rem);
+  bottom: clamp(0.875rem, 2vw, 1.5rem);
+  z-index: 50;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  background: var(--bg);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+html:not(.js) .readout { display: none; }
+html:not(.js) .theme-toggle { display: none; }
+
+/* ---------- Cursor dot (fine pointers only, added by JS) ---------- */
+
+.cursor-dot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 200;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s, width 0.25s, height 0.25s, margin 0.25s;
+}
+
+.cursor-dot.on { opacity: 0.9; }
+
+.cursor-dot.grow {
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  opacity: 0.45;
+}
+
+/* ============================================================
+   Motion. Everything below is skipped for reduced-motion users
+   (they get instant, static rendering) and all animations touch
+   only transform + opacity.
+   ============================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+
+  /* -- page-load sequence: pure CSS, runs with or without JS -- */
+
+  .hero-media {
+    animation: hero-zoom 1.6s var(--ease-out) both;
+  }
+
+  @keyframes hero-zoom {
+    from { transform: scale(1.055); }
+    to { transform: none; }
+  }
+
+  .hero-line-in {
+    animation: rise 0.9s var(--ease-out) 0.15s both;
+  }
+
+  @keyframes rise {
+    from { transform: translateY(110%); }
+    to { transform: none; }
+  }
+
+  /* slow endless drift; track holds two copies, so -50% loops seamlessly */
+  .marquee-track {
+    animation: marquee 90s linear infinite;
+  }
+
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
+  }
+
+  /* theme toggle: icons rotate/fade through the switch */
+  .theme-toggle svg {
+    transition: transform 0.5s var(--ease-out), opacity 0.3s linear;
+  }
+
+  /* whole-page crossfade while the theme flips; .theme-anim is added by JS
+     for ~0.5s around the switch */
+  html.theme-anim,
+  html.theme-anim body,
+  html.theme-anim * {
+    transition:
+      background-color 0.5s ease,
+      color 0.5s ease,
+      border-color 0.5s ease,
+      fill 0.5s ease,
+      stroke 0.5s ease,
+      transform 0.5s var(--ease-out) !important;
+  }
+
+  .brand { animation: fade-in 0.6s ease 0.1s both; }
+  .nav-links li:nth-child(1) { animation: fade-in 0.6s ease 0.3s both; }
+  .nav-links li:nth-child(2) { animation: fade-in 0.6s ease 0.42s both; }
+  .theme-toggle { animation: fade-in 0.6s ease 0.54s both; }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* -- scroll reveals: only when JS is present to add .in -- */
+
+  html.js [data-reveal] .reveal-group > *,
+  html.js .cta .cta-line {
+    opacity: 0;
+    transform: translateY(1.75rem);
+    transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+  }
+
+  html.js [data-reveal] .rail {
+    opacity: 0;
+    transition: opacity 0.8s var(--ease-out);
+  }
+
+  html.js [data-reveal] .reveal-group > *:nth-child(2) { transition-delay: 0.09s; }
+  html.js [data-reveal] .reveal-group > *:nth-child(3) { transition-delay: 0.18s; }
+  html.js [data-reveal] .reveal-group > *:nth-child(4) { transition-delay: 0.27s; }
+  html.js [data-reveal] .reveal-group > *:nth-child(5) { transition-delay: 0.36s; }
+
+  html.js [data-reveal].in .reveal-group > *,
+  html.js [data-reveal].in .rail,
+  html.js .cta.in .cta-line {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Wider screens: the two-column editorial grid ---------- */
+
+@media (min-width: 48rem) {
+  #about, #contact {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr);
+    gap: var(--pad);
+  }
+
+  .rail {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

@@ -58,8 +58,10 @@
              HERO IMAGE — swap here.
              Replace /assets/hero.jpg with any photo (same filename, or
              update this src). Keep width/height in the same ~16:9 ratio.
-             CSS applies filter:grayscale(1) + a bottom scrim, so any
-             color photo goes monochrome and the name stays readable.
+             Supply it already in black-and-white: grayscale is baked into
+             the asset, NOT applied via CSS filter, because filtering this
+             parallaxed layer makes Safari flash gray / flicker and bloats
+             its layer memory. A bottom scrim keeps the name readable.
              ============================================================ -->
         <img src="/assets/hero.jpg" width="1586" height="992" alt="Black-and-white portrait of John Fissel in a dark blazer, lit from the side against a black background" fetchpriority="high" decoding="async">
       </div>

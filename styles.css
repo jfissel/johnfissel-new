@@ -300,20 +300,24 @@ html.marquee-paused .marquee-toggle .icon-play { opacity: 1; transform: none; }
   /* subject sits right-of-center with his head near the top; keep both in
      frame when narrow viewports crop the sides or parallax crops the top */
   object-position: 65% 28%;
-  filter: grayscale(1);
-  will-change: transform;
+  /* no filter and no will-change here: grayscale is baked into the JPEG.
+     A runtime filter on this parallaxed layer makes Safari flash gray and
+     flicker while it re-rasterizes, and (with will-change) pins a second
+     full-size GPU buffer that pushes Safari into its memory-kill reload */
 }
 
-/* film grain so the photo reads as texture, not a flat JPG */
+/* film grain so the photo reads as texture, not a flat JPG.
+   Plain low-opacity desaturated noise — mix-blend-mode here made Safari
+   drop/re-apply the blend while the hero animates (gray wash, flicker)
+   and forced an extra full-hero compositing buffer */
 .hero-media::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 1;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 160px 160px;
-  mix-blend-mode: overlay;
-  opacity: 0.16;
+  opacity: 0.07;
   pointer-events: none;
 }
 
@@ -362,9 +366,11 @@ html.marquee-paused .marquee-toggle .icon-play { opacity: 1; transform: none; }
 
 .hero-line-in { display: inline-block; }
 
+/* no will-change: the running animation already promotes the track, and a
+   permanent hint kept this huge text layer resident even while paused,
+   feeding Safari's out-of-memory page reload */
 .marquee-track {
   display: inline-block;
-  will-change: transform;
 }
 
 .marquee-item { display: inline-block; }
@@ -669,7 +675,10 @@ html:not(.js) .ui-cluster { display: none; }
     animation: marquee 90s linear infinite;
   }
 
-  /* WCAG 2.2.2 — the nav pause button freezes the ticker in place */
+  /* WCAG 2.2.2 — the pause button freezes the ticker in place. JS pins the
+     live transform inline and kills the animation (Safari's compositor-thread
+     animations snap to a stale position when play-state pauses them); this
+     rule is only the fallback if that freeze throws */
   html.marquee-paused .marquee-track {
     animation-play-state: paused;
   }

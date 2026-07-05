@@ -48,18 +48,6 @@ Analytics** section). The CSP in `_headers` already allow-lists
 beacon isn't blocked; if you never enable analytics, those entries are
 harmless.
 
-## Swapping the hero image
-
-Replace `assets/hero.jpg` with any photo (keep the filename, or update the
-`src`). The exact spot is marked with a `HERO IMAGE — swap here` comment in
-`index.html`. Notes:
-
-- CSS applies `filter: grayscale(1)` plus a dark bottom scrim, so a color
-  photo automatically goes monochrome and the overlaid name stays readable.
-- Keep roughly a 16:9 image and update the `width`/`height` attributes on the
-  `<img>` to the new file's real dimensions (this prevents layout shift).
-- Update the `alt` text to describe the new image.
-
 ## Editing the about text
 
 The paragraph lives in `index.html` inside `<section id="about">` — it's the
@@ -79,5 +67,6 @@ single `<p class="lede">`. Contact links are in `<section id="contact">`.
 | `_headers` | Cloudflare Pages security headers + caching |
 | `robots.txt`, `sitemap.xml` | SEO plumbing |
 
-Light/dark theme follows the system preference; the toggle in the nav
-overrides it and persists the choice in `localStorage`.
+Light/dark theme follows the system preference; the toggle in the fixed
+bottom-left control cluster overrides it and persists the choice in
+`localStorage`.

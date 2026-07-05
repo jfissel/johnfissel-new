@@ -398,9 +398,6 @@ html.marquee-paused .marquee-toggle .icon-play { opacity: 1; transform: none; }
   background-repeat: repeat-x;
 }
 
-.section:first-of-type { border-top: 0; }
-.section:first-of-type::before { content: none; }
-
 /* the hero's axis baseline already divides it from the first section */
 .hero + .section { border-top: 0; }
 .hero + .section::before { content: none; }

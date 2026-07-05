@@ -1,5 +1,5 @@
 /* johnfissel.com — vanilla JS, no dependencies.
-   Theme toggle • scroll reveals • hero parallax • scroll index • cursor dot */
+   Theme toggle • marquee pause • scroll reveals • hero parallax • scroll index • cursor dot */
 (function () {
   "use strict";
 
@@ -35,15 +35,17 @@
     }
   }
 
-  toggle.addEventListener("click", function () {
-    var next = effectiveTheme() === "dark" ? "light" : "dark";
-    doc.setAttribute("data-theme", next);
-    try { localStorage.setItem("theme", next); } catch (e) {}
-    syncThemeUI();
-  });
+  if (toggle) {
+    toggle.addEventListener("click", function () {
+      var next = effectiveTheme() === "dark" ? "light" : "dark";
+      doc.setAttribute("data-theme", next);
+      try { localStorage.setItem("theme", next); } catch (e) {}
+      syncThemeUI();
+    });
 
-  systemDark.addEventListener("change", syncThemeUI);
-  syncThemeUI();
+    systemDark.addEventListener("change", syncThemeUI);
+    syncThemeUI();
+  }
 
   /* ---------- Marquee pause (WCAG 2.2.2 pause/stop/hide) ----------
      Safari runs transform animations on the compositor thread, and pausing
@@ -88,7 +90,8 @@
 
   /* ---------- Copyright year ---------- */
 
-  document.getElementById("year").textContent = new Date().getFullYear();
+  var yearEl = document.getElementById("year");
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   /* ---------- Scroll reveals ---------- */
 
@@ -122,9 +125,11 @@
     if (motionOK && heroImg && y < window.innerHeight * 1.2) {
       heroImg.style.transform = "translate3d(0," + (y * 0.14).toFixed(1) + "px,0)";
     }
-    var max = document.documentElement.scrollHeight - window.innerHeight;
-    var p = max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
-    readoutN.textContent = p.toFixed(3);
+    if (readoutN) {
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      var p = max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
+      readoutN.textContent = p.toFixed(3);
+    }
   }
 
   function requestFrame() {

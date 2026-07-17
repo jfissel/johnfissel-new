@@ -4,8 +4,19 @@
   "use strict";
 
   var doc = document.documentElement;
-  var motionOK = matchMedia("(prefers-reduced-motion: no-preference)").matches;
-  var systemDark = matchMedia("(prefers-color-scheme: dark)");
+
+  function mediaQuery(query) {
+    return typeof window.matchMedia === "function" ? window.matchMedia(query) : { matches: false };
+  }
+
+  function onMediaChange(query, callback) {
+    if (query.addEventListener) query.addEventListener("change", callback);
+    else if (query.addListener) query.addListener(callback);
+  }
+
+  var motionQuery = mediaQuery("(prefers-reduced-motion: no-preference)");
+  var motionOK = motionQuery.matches;
+  var systemDark = mediaQuery("(prefers-color-scheme: dark)");
 
   /* ---------- Theme toggle ---------- */
 
@@ -22,6 +33,7 @@
   function syncThemeUI() {
     var dark = effectiveTheme() === "dark";
     toggle.setAttribute("aria-pressed", String(dark));
+    toggle.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
     var metas = document.querySelectorAll('meta[name="theme-color"]');
     for (var i = 0; i < metas.length; i++) {
       if (doc.hasAttribute("data-theme")) {
@@ -43,7 +55,7 @@
       syncThemeUI();
     });
 
-    systemDark.addEventListener("change", syncThemeUI);
+    onMediaChange(systemDark, syncThemeUI);
     syncThemeUI();
   }
 
@@ -67,6 +79,10 @@
     marqueeToggle.addEventListener("click", function () {
       var paused = doc.classList.toggle("marquee-paused");
       marqueeToggle.setAttribute("aria-pressed", String(paused));
+      marqueeToggle.setAttribute(
+        "aria-label",
+        paused ? "Resume the scrolling headline" : "Pause the scrolling headline"
+      );
       try {
         if (paused) {
           var x = marqueeX(marqueeTrack);
@@ -96,22 +112,38 @@
   /* ---------- Scroll reveals ---------- */
 
   var revealEls = document.querySelectorAll("[data-reveal]");
-  if (motionOK && "IntersectionObserver" in window) {
-    var io = new IntersectionObserver(
-      function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("in");
-            io.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -6% 0px" }
-    );
-    revealEls.forEach(function (el) { io.observe(el); });
-  } else {
+
+  function revealAll() {
     revealEls.forEach(function (el) { el.classList.add("in"); });
   }
+
+  function initReveals() {
+    if (motionOK && "IntersectionObserver" in window) {
+      try {
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("in");
+                io.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.12, rootMargin: "0px 0px -6% 0px" }
+        );
+        revealEls.forEach(function (el) { io.observe(el); });
+      } catch (e) {
+        revealAll();
+      }
+    } else {
+      revealAll();
+    }
+
+    /* Only enable JS-only hiding after the reveal behavior is ready. */
+    doc.classList.add("js");
+  }
+
+  initReveals();
 
   /* ---------- Hero parallax + scroll index (one rAF loop) ---------- */
 
@@ -145,43 +177,76 @@
 
   /* ---------- Cursor dot (fine pointers, motion allowed) ---------- */
 
-  if (motionOK && matchMedia("(pointer: fine)").matches) {
-    var dot = document.createElement("div");
+  var pointerQuery = mediaQuery("(pointer: fine)");
+  var dot = null;
+  var mx = 0, my = 0, dx = 0, dy = 0, seen = false, raf = null;
+
+  function lerpFrame() {
+    if (!dot) return;
+    dx += (mx - dx) * 0.22;
+    dy += (my - dy) * 0.22;
+    dot.style.transform = "translate3d(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px,0)";
+    if (Math.abs(mx - dx) + Math.abs(my - dy) > 0.2) {
+      raf = requestAnimationFrame(lerpFrame);
+    } else {
+      raf = null;
+    }
+  }
+
+  function onMouseMove(e) {
+    mx = e.clientX;
+    my = e.clientY;
+    if (!seen) {
+      seen = true;
+      dx = mx;
+      dy = my;
+      dot.classList.add("on");
+    }
+    var t = e.target;
+    var interactive = t.closest && t.closest("a, button");
+    dot.classList.toggle("grow", !!interactive);
+    if (!raf) raf = requestAnimationFrame(lerpFrame);
+  }
+
+  function onMouseLeave() {
+    dot.classList.remove("on");
+    seen = false;
+  }
+
+  function enableCursorDot() {
+    if (dot) return;
+    dot = document.createElement("div");
     dot.className = "cursor-dot";
     dot.setAttribute("aria-hidden", "true");
     document.body.appendChild(dot);
 
-    var mx = 0, my = 0, dx = 0, dy = 0, seen = false, raf = null;
+    addEventListener("mousemove", onMouseMove, { passive: true });
+    document.addEventListener("mouseleave", onMouseLeave);
+  }
 
-    function lerpFrame() {
-      dx += (mx - dx) * 0.22;
-      dy += (my - dy) * 0.22;
-      dot.style.transform = "translate3d(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px,0)";
-      if (Math.abs(mx - dx) + Math.abs(my - dy) > 0.2) {
-        raf = requestAnimationFrame(lerpFrame);
-      } else {
-        raf = null;
-      }
+  function disableCursorDot() {
+    if (!dot) return;
+    removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseleave", onMouseLeave);
+    if (raf) cancelAnimationFrame(raf);
+    raf = null;
+    seen = false;
+    dot.remove();
+    dot = null;
+  }
+
+  function syncMotionEffects() {
+    motionOK = motionQuery.matches;
+    if (!motionOK) {
+      if (heroImg) heroImg.style.transform = "";
+      revealAll();
     }
 
-    addEventListener("mousemove", function (e) {
-      mx = e.clientX;
-      my = e.clientY;
-      if (!seen) {
-        seen = true;
-        dx = mx;
-        dy = my;
-        dot.classList.add("on");
-      }
-      var t = e.target;
-      var interactive = t.closest && t.closest("a, button");
-      dot.classList.toggle("grow", !!interactive);
-      if (!raf) raf = requestAnimationFrame(lerpFrame);
-    }, { passive: true });
-
-    document.addEventListener("mouseleave", function () {
-      dot.classList.remove("on");
-      seen = false;
-    });
+    if (motionOK && pointerQuery.matches) enableCursorDot();
+    else disableCursorDot();
   }
+
+  onMediaChange(motionQuery, syncMotionEffects);
+  onMediaChange(pointerQuery, syncMotionEffects);
+  syncMotionEffects();
 })();
